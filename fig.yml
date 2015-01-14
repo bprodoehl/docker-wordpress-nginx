@@ -1,0 +1,13 @@
+web:
+  build: .
+  ports:
+    - "80"
+  links:
+    - mysql
+mysql:
+  image: mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: 705S726dP56ci60U888c
+    MYSQL_DATABASE: wordpress
+    MYSQL_USER: wordpress
+    MYSQL_PASSWORD: B896TqxPA5e3xL99eu7R
