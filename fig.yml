@@ -6,6 +6,8 @@ web:
     - mysql
 mysql:
   image: mysql
+  volumes:
+      - ~/src/docker-wordpress-nginx/config/my.cnf:/etc/my.cnf:ro
   environment:
     MYSQL_ROOT_PASSWORD: 705S726dP56ci60U888c
     MYSQL_DATABASE: wordpress

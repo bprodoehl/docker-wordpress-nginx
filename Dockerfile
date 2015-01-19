@@ -1,4 +1,4 @@
-FROM bprodoehl/nginx-php-fail2ban
+FROM bprodoehl/nginx
 
 #RUN apt-get update && apt-get install -y rsync && rm -r /var/lib/apt/lists/*
 
@@ -33,11 +33,12 @@ RUN curl -o wordpress.tar.gz -SL https://wordpress.org/wordpress-${WORDPRESS_UPS
 	&& tar -xzf wordpress.tar.gz -C /usr/src/ \
 	&& rm wordpress.tar.gz
 
+RUN curl -O `curl -i -s https://wordpress.org/plugins/nginx-helper/ | egrep -o "https://downloads.wordpress.org/plugin/[^']+"` \
+    && unzip -o nginx-helper.*.zip -d /usr/src/wordpress/wp-content/plugins
+
 # nginx site conf
 ADD ./nginx-site.conf /etc/nginx/sites-available/default
 
-ADD docker-entrypoint.sh /etc/my_init.d/10-wordpress.sh
-
-# grr, ENTRYPOINT resets CMD now
-#ENTRYPOINT ["/entrypoint.sh"]
-#CMD ["apache2-foreground"]
+# install scripts that run once at container start
+ADD scripts/setup-db.sh                     /etc/my_init.d/10-setup-db.sh
+ADD scripts/activate-nginx-helper-plugin.sh /etc/my_init.d/20-activate-nginx-helper-plugin.sh
