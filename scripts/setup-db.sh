@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /usr/share/nginx/www
+cd /app
 
 echo 'Sleeping to allow MySQL to get ready.'
 sleep 10
@@ -39,6 +39,10 @@ if ! [ -e index.php -a -e wp-includes/version.php ]; then
 fi
 
 # TODO handle WordPress upgrades magically in the same way, but only if wp-includes/version.php's $wp_version is less than /usr/src/wordpress/wp-includes/version.php's $wp_version
+
+if [ ! -z "$FORCE_WP_CONFIG" ]; then
+    rm -f wp-config.php
+fi
 
 if [ ! -e wp-config.php ]; then
     awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wp-config-sample.php > wp-config.php <<'EOPHP'
