@@ -1,15 +1,5 @@
 FROM bprodoehl/nginx
 
-#RUN apt-get update && apt-get install -y rsync && rm -r /var/lib/apt/lists/*
-
-#RUN a2enmod rewrite
-
-# install the PHP extensions we need
-#RUN apt-get update && apt-get install -y libpng12-dev && rm -rf /var/lib/apt/lists/* \
-#	&& docker-php-ext-install gd \
-#	&& apt-get purge --auto-remove -y libpng12-dev
-#RUN docker-php-ext-install mysqli
-
 # Basic Requirements
 RUN apt-get update && \
     apt-get -y install rsync mysql-client nginx php5-fpm php5-mysql \
@@ -20,8 +10,6 @@ RUN apt-get -y install php5-curl php5-gd php5-intl php-pear php5-imagick \
                        php5-imap php5-mcrypt php5-memcache php5-ming php5-ps \
 					   php5-pspell php5-recode php5-sqlite php5-tidy \
 					   php5-xmlrpc php5-xsl
-
-VOLUME /usr/share/nginx/www
 
 ENV WORDPRESS_VERSION 4.1.0
 ENV WORDPRESS_UPSTREAM_VERSION 4.1
@@ -38,7 +26,13 @@ RUN curl -O `curl -i -s https://wordpress.org/plugins/nginx-helper/ | egrep -o "
 
 # nginx site conf
 ADD ./nginx-site.conf /etc/nginx/sites-available/default
+ADD ./nginx-http.conf /etc/nginx/conf.d/wordpress.conf
 
 # install scripts that run once at container start
 ADD scripts/setup-db.sh                     /etc/my_init.d/10-setup-db.sh
 ADD scripts/activate-nginx-helper-plugin.sh /etc/my_init.d/20-activate-nginx-helper-plugin.sh
+
+# WordPress themes can stretch past the 2M default limit
+RUN sed -i 's/^upload_max_filesize\ =.*/upload_max_filesize\ =\ 20M/' /etc/php5/fpm/php.ini
+RUN sed -i 's/^post_max_size\ =.*/post_max_size\ =\ 20M/' /etc/php5/fpm/php.ini
+RUN echo "\nhttp {\n\tclient_max_body_size 20m;\n}\n" >> /etc/nginx/nginx.conf
