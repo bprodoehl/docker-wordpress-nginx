@@ -41,10 +41,12 @@ fi
 # TODO handle WordPress upgrades magically in the same way, but only if wp-includes/version.php's $wp_version is less than /usr/src/wordpress/wp-includes/version.php's $wp_version
 
 if [ ! -z "$FORCE_WP_CONFIG" ]; then
+    echo "Removing existing wp-config.php"
     rm -f wp-config.php
 fi
 
 if [ ! -e wp-config.php ]; then
+    echo "Creating shiny new wp-config.php"
     awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wp-config-sample.php > wp-config.php <<'EOPHP'
     // If we're behind a proxy server and using HTTPS, we need to alert Wordpress of that fact
     // see also http://codex.wordpress.org/Administration_Over_SSL#Using_a_Reverse_Proxy

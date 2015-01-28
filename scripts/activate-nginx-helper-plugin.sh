@@ -8,16 +8,19 @@ if [ ! -d /app/wp-content/plugins/nginx-helper ]; then
 fi
 
 # Activate nginx plugin and set up pretty permalink structure once logged in
-cat << ENDL >> /app/wp-config.php
-\$plugins = get_option( 'active_plugins' );
-if ( count( \$plugins ) === 0 ) {
-    require_once(ABSPATH .'/wp-admin/includes/plugin.php');
-    \$wp_rewrite->set_permalink_structure( '/%postname%/' );
-    \$pluginsToActivate = array( 'nginx-helper/nginx-helper.php' );
-    foreach ( \$pluginsToActivate as \$plugin ) {
-        if ( !in_array( \$plugin, \$plugins ) ) {
-            activate_plugin( '/app/wp-content/plugins/' . \$plugin );
+if [ `cat /app/wp-config.php | grep nginx\-helper\/nginx\-helper\.php | wc -l` -eq 0 ]; then
+    echo "Enabling nginx-helper plugin..."
+    cat << ENDL >> /app/wp-config.php
+    \$plugins = get_option( 'active_plugins' );
+    if ( count( \$plugins ) === 0 ) {
+        require_once(ABSPATH .'/wp-admin/includes/plugin.php');
+        \$wp_rewrite->set_permalink_structure( '/%postname%/' );
+        \$pluginsToActivate = array( 'nginx-helper/nginx-helper.php' );
+        foreach ( \$pluginsToActivate as \$plugin ) {
+            if ( !in_array( \$plugin, \$plugins ) ) {
+                activate_plugin( '/app/wp-content/plugins/' . \$plugin );
+            }
         }
     }
-}
 ENDL
+fi
